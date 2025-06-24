@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "278557629285",
+    "project_id": "three-o",
+    "storage_bucket": "three-o.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:278557629285:android:02daaaef36b89631ad1f8c",
+        "android_client_info": {
+          "package_name": "com.example.three_o"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEzFdl2XZOnxph8EpKqYS2z7URdaSLHdQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:278557629285:android:50da43d5135521bfad1f8c",
+        "android_client_info": {
+          "package_name": "com.example.three_one"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEzFdl2XZOnxph8EpKqYS2z7URdaSLHdQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
