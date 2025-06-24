@@ -42,6 +42,8 @@ class _RegisterUserInfoPageState extends ConsumerState<RegisterUserInfoPage> {
     );
     try {
       await ref.read(saveUserProfileUseCaseProvider).execute(userProfile);
+      ref.invalidate(userProfileProvider(user.uid));
+      ref.invalidate(appUserStreamProvider);
       if (mounted) context.go('/');
     } catch (e) {
       if (mounted) {
