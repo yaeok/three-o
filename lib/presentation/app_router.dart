@@ -47,7 +47,7 @@ GoRouter appRouter(Ref ref) {
       // 5. ログイン済みユーザーに対するリダイレクト処理（ここから下は appUser != null が確定）
 
       // 5a. メール未認証の場合
-      if (!appUser!.emailVerified) {
+      if (!appUser.emailVerified) {
         // メール認証ページ以外にいる場合は、認証ページへ飛ばす
         return location == '/verify-email' ? null : '/verify-email';
       }

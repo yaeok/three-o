@@ -44,7 +44,7 @@ class _RegisterUserInfoPageState extends ConsumerState<RegisterUserInfoPage> {
       await ref.read(saveUserProfileUseCaseProvider).execute(userProfile);
       ref.invalidate(userProfileProvider(user.uid));
       ref.invalidate(appUserStreamProvider);
-      if (mounted) context.go('/');
+      if (mounted) context.pop();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
