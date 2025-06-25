@@ -16,19 +16,18 @@ class ChatPage extends ConsumerStatefulWidget {
 
 class _ChatPageState extends ConsumerState<ChatPage> {
   final _textController = TextEditingController();
-  final _scrollController = ScrollController(); // 1. ScrollControllerを追加
+  final _scrollController = ScrollController();
   bool _isSending = false;
 
   @override
   void dispose() {
     _textController.dispose();
-    _scrollController.dispose(); // 2. ScrollControllerを破棄
+    _scrollController.dispose();
     super.dispose();
   }
 
   Future<void> _sendMessage() async {
     if (_textController.text.isEmpty) return;
-
     setState(() => _isSending = true);
 
     final user = ref.read(appUserStreamProvider).value;
@@ -61,12 +60,13 @@ class _ChatPageState extends ConsumerState<ChatPage> {
             history: history,
             message: message,
           );
-      // 4. メッセージ送信後にアニメーションを実行
-      _scrollController.animateTo(
-        0,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
+      if (mounted) {
+        _scrollController.animateTo(
+          0,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
@@ -93,6 +93,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       ),
     );
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
       appBar: AppBar(title: Text(agent.name)),
@@ -101,38 +102,53 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           Expanded(
             child: messagesAsync.when(
               data: (messages) => ListView.builder(
-                controller: _scrollController, // 3. ListViewにControllerを適用
+                controller: _scrollController,
                 reverse: true,
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8.0,
+                  horizontal: 12.0,
+                ),
                 itemCount: messages.length,
                 itemBuilder: (context, index) {
                   final message = messages[messages.length - 1 - index];
                   final isUser = message.sender == SenderRole.user;
+
+                  // メッセージバブルの角丸を調整
+                  const radius = Radius.circular(20);
+                  final bubbleBorderRadius = isUser
+                      ? const BorderRadius.only(
+                          topLeft: radius,
+                          topRight: radius,
+                          bottomLeft: radius,
+                        )
+                      : const BorderRadius.only(
+                          topLeft: radius,
+                          topRight: radius,
+                          bottomRight: radius,
+                        );
+
                   return Align(
                     alignment: isUser
                         ? Alignment.centerRight
                         : Alignment.centerLeft,
                     child: Container(
-                      margin: const EdgeInsets.symmetric(
-                        vertical: 4,
-                        horizontal: 8,
-                      ),
+                      margin: const EdgeInsets.symmetric(vertical: 6),
                       padding: const EdgeInsets.symmetric(
-                        vertical: 10,
-                        horizontal: 14,
+                        vertical: 12,
+                        horizontal: 16,
                       ),
                       decoration: BoxDecoration(
                         color: isUser
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(16),
+                            ? colorScheme.primary
+                            : colorScheme.surfaceContainerHighest,
+                        borderRadius: bubbleBorderRadius,
                       ),
                       child: Text(
                         message.text,
-                        style: TextStyle(
+                        style: theme.textTheme.bodyLarge?.copyWith(
                           color: isUser
-                              ? theme.colorScheme.onPrimary
-                              : theme.colorScheme.onSurfaceVariant,
+                              ? colorScheme.onPrimary
+                              : colorScheme.onSurface,
                         ),
                       ),
                     ),
@@ -143,41 +159,50 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               error: (e, s) => Center(child: Text('エラー: $e')),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _textController,
-                    decoration: InputDecoration(
-                      hintText: 'メッセージを入力...',
-                      filled: true,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                    ),
-                    onSubmitted: (_) => _sendMessage(),
-                  ),
+          // --- 入力欄のスタイル調整 ---
+          Container(
+            padding: const EdgeInsets.all(12.0).copyWith(top: 8.0),
+            decoration: BoxDecoration(
+              color: theme.scaffoldBackgroundColor,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, -4),
                 ),
-                const SizedBox(width: 8),
-                if (_isSending)
-                  const CircularProgressIndicator()
-                else
-                  IconButton(
-                    icon: const Icon(Icons.send),
-                    onPressed: _sendMessage,
-                    style: IconButton.styleFrom(
-                      backgroundColor: theme.colorScheme.primary,
-                      foregroundColor: theme.colorScheme.onPrimary,
+              ],
+            ),
+            child: SafeArea(
+              top: false,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _textController,
+                      decoration: const InputDecoration(
+                        hintText: 'メッセージを入力...',
+                      ),
+                      onSubmitted: (_) => _sendMessage(),
+                      minLines: 1,
+                      maxLines: 5,
                     ),
                   ),
-              ],
+                  const SizedBox(width: 8),
+                  if (_isSending)
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: CircularProgressIndicator(),
+                    )
+                  else
+                    IconButton.filled(
+                      icon: const Icon(Icons.send),
+                      onPressed: _sendMessage,
+                      style: IconButton.styleFrom(
+                        padding: const EdgeInsets.all(12),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         ],
