@@ -16,7 +16,15 @@ class ChatPage extends ConsumerStatefulWidget {
 
 class _ChatPageState extends ConsumerState<ChatPage> {
   final _textController = TextEditingController();
+  final _scrollController = ScrollController(); // 1. ScrollControllerを追加
   bool _isSending = false;
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    _scrollController.dispose(); // 2. ScrollControllerを破棄
+    super.dispose();
+  }
 
   Future<void> _sendMessage() async {
     if (_textController.text.isEmpty) return;
@@ -32,7 +40,10 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     final history =
         ref.read(messagesStreamProvider(widget.agentId)).value ?? [];
 
-    if (user == null) return;
+    if (user == null) {
+      if (mounted) setState(() => _isSending = false);
+      return;
+    }
 
     final message = Message(
       text: _textController.text,
@@ -50,8 +61,18 @@ class _ChatPageState extends ConsumerState<ChatPage> {
             history: history,
             message: message,
           );
+      // 4. メッセージ送信後にアニメーションを実行
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
     } catch (e) {
-      // エラーハンドリング
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('メッセージの送信に失敗しました: $e')));
+      }
     } finally {
       if (mounted) setState(() => _isSending = false);
     }
@@ -71,6 +92,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         industryInfo: '',
       ),
     );
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(title: Text(agent.name)),
@@ -79,7 +101,9 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           Expanded(
             child: messagesAsync.when(
               data: (messages) => ListView.builder(
+                controller: _scrollController, // 3. ListViewにControllerを適用
                 reverse: true,
+                padding: const EdgeInsets.all(8.0),
                 itemCount: messages.length,
                 itemBuilder: (context, index) {
                   final message = messages[messages.length - 1 - index];
@@ -93,12 +117,24 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                         vertical: 4,
                         horizontal: 8,
                       ),
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 10,
+                        horizontal: 14,
+                      ),
                       decoration: BoxDecoration(
-                        color: isUser ? Colors.blue[100] : Colors.grey[200],
+                        color: isUser
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Text(message.text),
+                      child: Text(
+                        message.text,
+                        style: TextStyle(
+                          color: isUser
+                              ? theme.colorScheme.onPrimary
+                              : theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
                     ),
                   );
                 },
@@ -114,13 +150,33 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 Expanded(
                   child: TextField(
                     controller: _textController,
-                    decoration: const InputDecoration(hintText: 'メッセージを入力...'),
+                    decoration: InputDecoration(
+                      hintText: 'メッセージを入力...',
+                      filled: true,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                    ),
+                    onSubmitted: (_) => _sendMessage(),
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.send),
-                  onPressed: _isSending ? null : _sendMessage,
-                ),
+                const SizedBox(width: 8),
+                if (_isSending)
+                  const CircularProgressIndicator()
+                else
+                  IconButton(
+                    icon: const Icon(Icons.send),
+                    onPressed: _sendMessage,
+                    style: IconButton.styleFrom(
+                      backgroundColor: theme.colorScheme.primary,
+                      foregroundColor: theme.colorScheme.onPrimary,
+                    ),
+                  ),
               ],
             ),
           ),
