@@ -17,7 +17,7 @@ class AgentListItem extends ConsumerWidget {
       background: Container(
         color: Colors.red,
         alignment: Alignment.centerRight,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         child: const Icon(Icons.delete, color: Colors.white),
       ),
       confirmDismiss: (direction) async {
@@ -61,7 +61,7 @@ class AgentListItem extends ConsumerWidget {
         }
       },
       child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         child: ListTile(
           leading: const CircleAvatar(child: Icon(Icons.person_outline)),
           title: Text(agent.name),
