@@ -11,14 +11,24 @@ class AgentListItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Dismissible(
       key: ValueKey(agent.id),
       direction: DismissDirection.endToStart,
       background: Container(
-        color: Colors.red,
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: colorScheme.errorContainer,
+          borderRadius: BorderRadius.circular(16),
+        ),
         alignment: Alignment.centerRight,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: const Icon(Icons.delete, color: Colors.white),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Icon(
+          Icons.delete_sweep_outlined,
+          color: colorScheme.onErrorContainer,
+        ),
       ),
       confirmDismiss: (direction) async {
         return await showDialog(
@@ -34,8 +44,7 @@ class AgentListItem extends ConsumerWidget {
                 ),
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(true),
-                  style: TextButton.styleFrom(foregroundColor: Colors.red),
-                  child: const Text('削除'),
+                  child: Text('削除', style: TextStyle(color: colorScheme.error)),
                 ),
               ],
             );
@@ -61,12 +70,28 @@ class AgentListItem extends ConsumerWidget {
         }
       },
       child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: ListTile(
-          leading: const CircleAvatar(child: Icon(Icons.person_outline)),
-          title: Text(agent.name),
-          subtitle: Text(agent.role),
-          trailing: const Icon(Icons.chevron_right),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 12,
+          ),
+          leading: CircleAvatar(
+            radius: 28,
+            backgroundColor: colorScheme.primaryContainer,
+            child: Icon(
+              Icons.person_outline,
+              color: colorScheme.onPrimaryContainer,
+            ),
+          ),
+          title: Text(
+            agent.name,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          subtitle: Text(agent.role, style: theme.textTheme.bodyMedium),
+          trailing: Icon(Icons.chevron_right, color: colorScheme.outline),
           onTap: () {
             context.push('/chat/${agent.id}');
           },

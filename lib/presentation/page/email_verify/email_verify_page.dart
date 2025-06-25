@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:three_o/presentation/provider/auth_provider.dart';
-import 'package:firebase_auth/firebase_auth.dart' as firebase;
 
 class EmailVerifyPage extends ConsumerStatefulWidget {
   const EmailVerifyPage({super.key});
@@ -13,21 +12,15 @@ class EmailVerifyPage extends ConsumerStatefulWidget {
 class _EmailVerifyPageState extends ConsumerState<EmailVerifyPage> {
   bool _isChecking = false;
 
-  // ユーザーのメール認証状態を再確認するメソッド
   Future<void> _checkVerificationStatus() async {
     setState(() => _isChecking = true);
-
-    // ユーザー情報を再読み込みして最新の状態を取得
     final user = ref.read(firebaseAuthProvider).currentUser;
     await user?.reload();
 
-    // 最新のユーザー情報で`emailVerified`をチェック
     final latestUser = ref.read(firebaseAuthProvider).currentUser;
     if (latestUser != null && latestUser.emailVerified) {
-      // 認証済みの場合、Providerを無効化してGoRouterの再評価をトリガーする
       ref.invalidate(appUserStreamProvider);
     } else {
-      // 未認証の場合、ユーザーにフィードバック
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('まだメール認証が完了していません。受信トレイをご確認ください。')),
@@ -42,52 +35,76 @@ class _EmailVerifyPageState extends ConsumerState<EmailVerifyPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('メールアドレスの確認')),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Icon(
-                Icons.mark_email_read_outlined,
-                size: 80,
-                color: Colors.grey,
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                '確認メールを送信しました。\nメール内のリンクをクリックして、登録を完了してください。',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16),
-              ),
-              const SizedBox(height: 32),
-              if (_isChecking)
-                const Center(child: CircularProgressIndicator())
-              else
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Icon(
+                  Icons.mark_email_read_outlined,
+                  size: 80,
+                  color: colorScheme.primary,
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  '確認メールを送信しました',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'メール内のリンクをクリックして、\n登録を完了してください。',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 32),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    minimumSize: const Size.fromHeight(50),
                   ),
-                  onPressed: _checkVerificationStatus,
-                  child: const Text('確認完了、次へ進む'),
+                  onPressed: _isChecking ? null : _checkVerificationStatus,
+                  child: _isChecking
+                      ? const SizedBox.square(
+                          dimension: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 3,
+                          ),
+                        )
+                      : const Text('確認完了、次へ進む'),
                 ),
-              const SizedBox(height: 12),
-              TextButton(
-                onPressed: () {
-                  ref.read(authRepositoryProvider).sendEmailVerification();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('確認メールを再送信しました')),
-                  );
-                },
-                child: const Text('確認メールを再送信'),
-              ),
-              TextButton(
-                onPressed: () => ref.read(authRepositoryProvider).signOut(),
-                child: const Text('ログアウト'),
-              ),
-            ],
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: () {
+                    ref.read(authRepositoryProvider).sendEmailVerification();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('確認メールを再送信しました')),
+                    );
+                  },
+                  child: const Text('確認メールを再送信'),
+                ),
+                TextButton(
+                  onPressed: () => ref.read(authRepositoryProvider).signOut(),
+                  child: Text(
+                    'ログアウト',
+                    style: TextStyle(
+                      color: colorScheme.onSurfaceVariant.withOpacity(0.7),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
