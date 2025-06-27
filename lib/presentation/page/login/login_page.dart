@@ -2,48 +2,40 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:three_o/presentation/provider/auth_provider.dart';
+import 'package:three_o/presentation/provider/loading_provider.dart';
 
-class LoginPage extends ConsumerStatefulWidget {
+// StatelessWidgetでもProviderを扱えるため、ConsumerWidgetに変更
+class LoginPage extends ConsumerWidget {
   const LoginPage({super.key});
-  @override
-  ConsumerState<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends ConsumerState<LoginPage> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  String? _errorMessage;
-  bool _isLoading = false;
-
-  Future<void> _signIn() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-    try {
-      await ref
-          .read(signInUseCaseProvider)
-          .execute(
-            email: _emailController.text,
-            password: _passwordController.text,
-          );
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'メールアドレスまたはパスワードが正しくありません。';
-      });
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+    // エラーメッセージはローカルで管理
+    final errorMessage = StateProvider<String?>((ref) => null);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+
+    Future<void> signIn() async {
+      // グローバルなローディングを開始
+      ref.read(loadingProvider.notifier).startLoading();
+      ref.read(errorMessage.notifier).state = null;
+
+      try {
+        await ref
+            .read(signInUseCaseProvider)
+            .execute(
+              email: emailController.text,
+              password: passwordController.text,
+            );
+      } catch (e) {
+        ref.read(errorMessage.notifier).state = 'メールアドレスまたはパスワードが正しくありません。';
+      } finally {
+        // 処理完了後、必ずローディングを終了
+        ref.read(loadingProvider.notifier).endLoading();
+      }
+    }
 
     return Scaffold(
       body: SafeArea(
@@ -57,7 +49,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Icon(Icons.person_pin, size: 80, color: colorScheme.primary),
+                Icon(
+                  Icons.person_pin_rounded,
+                  size: 80,
+                  color: colorScheme.primary,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   'お帰りなさい',
@@ -66,7 +62,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 8),
                 Text(
                   'AI上司との対話を再開しましょう',
                   textAlign: TextAlign.center,
@@ -75,17 +70,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                 ),
                 const SizedBox(height: 32),
-                if (_errorMessage != null)
+                if (ref.watch(errorMessage) != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 16.0),
                     child: Text(
-                      _errorMessage!,
+                      ref.watch(errorMessage)!,
                       textAlign: TextAlign.center,
                       style: TextStyle(color: colorScheme.error),
                     ),
                   ),
                 TextField(
-                  controller: _emailController,
+                  controller: emailController,
                   decoration: const InputDecoration(
                     labelText: 'メールアドレス',
                     prefixIcon: Icon(Icons.email_outlined),
@@ -94,7 +89,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 ),
                 const SizedBox(height: 16),
                 TextField(
-                  controller: _passwordController,
+                  controller: passwordController,
                   decoration: const InputDecoration(
                     labelText: 'パスワード',
                     prefixIcon: Icon(Icons.lock_outline),
@@ -104,18 +99,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 const SizedBox(height: 24),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(50), // 高さを確保
+                    minimumSize: const Size.fromHeight(50),
                   ),
-                  onPressed: _isLoading ? null : _signIn,
-                  child: _isLoading
-                      ? const SizedBox.square(
-                          dimension: 24, // インジケーターのサイズを適切に設定
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 3,
-                          ),
-                        )
-                      : const Text('ログイン'),
+                  // ボタン内のインジケーターは不要に
+                  onPressed: signIn,
+                  child: const Text('ログイン'),
                 ),
                 const SizedBox(height: 16),
                 TextButton(

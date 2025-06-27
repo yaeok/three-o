@@ -1,42 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:three_o/presentation/provider/auth_provider.dart';
+import 'package:three_o/presentation/provider/loading_provider.dart';
 
-class EmailVerifyPage extends ConsumerStatefulWidget {
+class EmailVerifyPage extends ConsumerWidget {
   const EmailVerifyPage({super.key});
 
   @override
-  ConsumerState<EmailVerifyPage> createState() => _EmailVerifyPageState();
-}
-
-class _EmailVerifyPageState extends ConsumerState<EmailVerifyPage> {
-  bool _isChecking = false;
-
-  Future<void> _checkVerificationStatus() async {
-    setState(() => _isChecking = true);
-    final user = ref.read(firebaseAuthProvider).currentUser;
-    await user?.reload();
-
-    final latestUser = ref.read(firebaseAuthProvider).currentUser;
-    if (latestUser != null && latestUser.emailVerified) {
-      ref.invalidate(appUserStreamProvider);
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('まだメール認証が完了していません。受信トレイをご確認ください。')),
-        );
-      }
-    }
-
-    if (mounted) {
-      setState(() => _isChecking = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+
+    Future<void> checkVerificationStatus() async {
+      ref.read(loadingProvider.notifier).startLoading();
+      try {
+        final user = ref.read(firebaseAuthProvider).currentUser;
+        await user?.reload();
+
+        final latestUser = ref.read(firebaseAuthProvider).currentUser;
+        if (latestUser != null && latestUser.emailVerified) {
+          ref.invalidate(appUserStreamProvider);
+        } else {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('まだメール認証が完了していません。受信トレイをご確認ください。')),
+            );
+          }
+        }
+      } finally {
+        ref.read(loadingProvider.notifier).endLoading();
+      }
+    }
 
     return Scaffold(
       body: SafeArea(
@@ -73,16 +67,8 @@ class _EmailVerifyPageState extends ConsumerState<EmailVerifyPage> {
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size.fromHeight(50),
                   ),
-                  onPressed: _isChecking ? null : _checkVerificationStatus,
-                  child: _isChecking
-                      ? const SizedBox.square(
-                          dimension: 24,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 3,
-                          ),
-                        )
-                      : const Text('確認完了、次へ進む'),
+                  onPressed: checkVerificationStatus,
+                  child: const Text('確認完了、次へ進む'),
                 ),
                 const SizedBox(height: 12),
                 TextButton(
