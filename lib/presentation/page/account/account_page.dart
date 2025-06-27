@@ -71,15 +71,15 @@ class AccountPage extends ConsumerWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
-                      Center(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // TODO: 課金ページへの導線
-                          },
-                          child: const Text('プランをアップグレード'),
-                        ),
-                      ),
+                      // const SizedBox(height: 16),
+                      // Center(
+                      //   child: ElevatedButton(
+                      //     onPressed: () {
+                      //       // TODO: 課金ページへの導線
+                      //     },
+                      //     child: const Text('プランをアップグレード'),
+                      //   ),
+                      // ),
                     ],
                   );
                 },

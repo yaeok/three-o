@@ -3,11 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:three_o/domain/model/agent/agent.dart';
 import 'package:three_o/presentation/provider/agent_provider.dart';
+import 'package:three_o/presentation/provider/loading_provider.dart';
 
 class AgentUpdatePage extends ConsumerStatefulWidget {
   const AgentUpdatePage({super.key, required this.agent});
-
-  // 編集対象のAgentデータを前の画面から受け取る
   final Agent agent;
 
   @override
@@ -20,12 +19,10 @@ class _AgentUpdatePageState extends ConsumerState<AgentUpdatePage> {
   late final TextEditingController _roleController;
   late final TextEditingController _personalityController;
   late final TextEditingController _industryInfoController;
-  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    // 受け取ったAgentデータでフォームの初期値を設定
     _nameController = TextEditingController(text: widget.agent.name);
     _roleController = TextEditingController(text: widget.agent.role);
     _personalityController = TextEditingController(
@@ -47,9 +44,9 @@ class _AgentUpdatePageState extends ConsumerState<AgentUpdatePage> {
 
   Future<void> _updateAgent() async {
     if (!_formKey.currentState!.validate()) return;
-    setState(() => _isLoading = true);
 
-    // フォームの入力内容でAgentデータを更新
+    ref.read(loadingProvider.notifier).startLoading();
+
     final updatedAgent = widget.agent.copyWith(
       name: _nameController.text,
       role: _roleController.text,
@@ -58,14 +55,13 @@ class _AgentUpdatePageState extends ConsumerState<AgentUpdatePage> {
     );
 
     try {
-      // 保存Usecaseを実行（IDが既にあるため、更新処理となる）
       await ref.read(saveAgentUseCaseProvider).execute(updatedAgent);
-      ref.invalidate(agentsStreamProvider); // 一覧を更新
+      ref.invalidate(agentsStreamProvider);
       if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('AI上司の情報を更新しました')));
-        context.pop(); // 前の画面に戻る
+        context.pop();
       }
     } catch (e) {
       if (mounted) {
@@ -74,14 +70,12 @@ class _AgentUpdatePageState extends ConsumerState<AgentUpdatePage> {
         ).showSnackBar(SnackBar(content: Text('エラー：更新に失敗しました。$e')));
       }
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      ref.read(loadingProvider.notifier).endLoading();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(title: const Text('AI上司の編集')),
       body: SingleChildScrollView(
@@ -136,16 +130,8 @@ class _AgentUpdatePageState extends ConsumerState<AgentUpdatePage> {
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size.fromHeight(50),
                 ),
-                onPressed: _isLoading ? null : _updateAgent,
-                child: _isLoading
-                    ? const SizedBox.square(
-                        dimension: 24,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 3,
-                        ),
-                      )
-                    : const Text('この内容で更新'),
+                onPressed: _updateAgent,
+                child: const Text('この内容で更新'),
               ),
             ],
           ),
