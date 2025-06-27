@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:three_o/domain/model/agent/agent.dart';
 import 'package:three_o/presentation/page/account/account_page.dart';
 import 'package:three_o/presentation/page/account/profile_update_page.dart';
 import 'package:three_o/presentation/page/agent_form/agent_form_page.dart';
+import 'package:three_o/presentation/page/agent_form/agent_update_page.dart';
 import 'package:three_o/presentation/page/chat/chat_page.dart';
 import 'package:three_o/presentation/page/email_verify/email_verify_page.dart';
 import 'package:three_o/presentation/page/home/home_page.dart';
@@ -132,6 +134,15 @@ GoRouter appRouter(Ref ref) {
                     path: 'agent/new',
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (context, state) => const AgentFormPage(),
+                  ),
+                  GoRoute(
+                    path: 'agent/update',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (context, state) {
+                      // extraで渡されたAgentオブジェクトを受け取る
+                      final agent = state.extra as Agent;
+                      return AgentUpdatePage(agent: agent);
+                    },
                   ),
                   GoRoute(
                     path: 'chat/:agentId',
