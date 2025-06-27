@@ -7,6 +7,7 @@ import 'package:three_o/infrastructure/repository/chat_repository_impl.dart';
 import 'package:three_o/infrastructure/service/gemini_service.dart';
 import 'package:three_o/presentation/provider/auth_provider.dart';
 import 'package:three_o/presentation/provider/user_profile_provider.dart';
+import 'package:three_o/presentation/provider/usage_provider.dart'; // Usageプロバイダーをインポート
 
 part 'chat_provider.g.dart';
 
@@ -17,13 +18,13 @@ GeminiService geminiService(Ref ref) => GeminiService();
 ChatRepository chatRepository(Ref ref) => ChatRepositoryImpl(
   ref.watch(firebaseFirestoreProvider),
   ref.watch(geminiServiceProvider),
+  ref.watch(usageRepositoryProvider), // UsageRepositoryを注入
 );
 
 @riverpod
 SendMessageUseCase sendMessageUseCase(Ref ref) =>
     SendMessageUseCase(ref.watch(chatRepositoryProvider));
 
-// .family を使い、agentIdごとにメッセージ一覧を供給する
 @riverpod
 Stream<List<Message>> messagesStream(Ref ref, String agentId) {
   final userId = ref.watch(appUserStreamProvider).value?.uid;

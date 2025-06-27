@@ -23,7 +23,7 @@ final geminiServiceProvider = AutoDisposeProvider<GeminiService>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef GeminiServiceRef = AutoDisposeProviderRef<GeminiService>;
-String _$chatRepositoryHash() => r'f946723a1c44ebd86c2cbc25250d37f7202ad362';
+String _$chatRepositoryHash() => r'8a85afe6d976292ac7f50d04d5c0282ba67942c5';
 
 /// See also [chatRepository].
 @ProviderFor(chatRepository)

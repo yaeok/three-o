@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:three_o/presentation/provider/agent_provider.dart';
 import 'package:three_o/presentation/provider/auth_provider.dart';
 
 class MainScaffold extends ConsumerWidget {
@@ -18,6 +19,12 @@ class MainScaffold extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final titles = ['AI上司一覧', 'アカウント'];
+    final theme = Theme.of(context);
+
+    final agentsAsyncValue = ref.watch(agentsStreamProvider);
+    final agentCount = agentsAsyncValue.value?.length ?? 0;
+    final canCreateAgent = agentCount < 3;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(titles[navigationShell.currentIndex]),
@@ -31,8 +38,24 @@ class MainScaffold extends ConsumerWidget {
       body: navigationShell,
       floatingActionButton: navigationShell.currentIndex == 0
           ? FloatingActionButton(
+              onPressed: canCreateAgent
+                  ? () => context.push('/agent/new')
+                  : () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('AI上司は3人まで作成できます。'),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    },
+              backgroundColor: canCreateAgent
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.surfaceContainerHighest,
+              foregroundColor: canCreateAgent
+                  ? theme.colorScheme.onPrimary
+                  : theme.colorScheme.onSurfaceVariant,
+              elevation: canCreateAgent ? 6.0 : 0.0,
               child: const Icon(Icons.add),
-              onPressed: () => context.push('/agent/new'),
             )
           : null,
       bottomNavigationBar: BottomNavigationBar(
