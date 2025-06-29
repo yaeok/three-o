@@ -13,6 +13,8 @@ import 'package:three_o/presentation/page/email_verify/email_verify_page.dart';
 import 'package:three_o/presentation/page/home/home_page.dart';
 import 'package:three_o/presentation/page/login/login_page.dart';
 import 'package:three_o/presentation/page/register_user_info/register_user_info_page.dart';
+import 'package:three_o/presentation/page/settings/privacy_policy_page.dart';
+import 'package:three_o/presentation/page/settings/terms_of_service_page.dart';
 import 'package:three_o/presentation/page/signup/signup_page.dart';
 import 'package:three_o/presentation/provider/auth_provider.dart';
 import 'package:three_o/presentation/widget/main_scaffold.dart';
@@ -115,6 +117,16 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: '/register-user-info',
         builder: (context, state) => const RegisterUserInfoPage(),
+      ),
+      GoRoute(
+        path: '/terms-of-service',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const TermsOfServicePage(),
+      ),
+      GoRoute(
+        path: '/privacy-policy',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const PrivacyPolicyPage(),
       ),
 
       // --- BottomNavBarを表示するメインの画面 ---

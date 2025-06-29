@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:three_o/presentation/provider/agent_provider.dart';
-import 'package:three_o/presentation/provider/auth_provider.dart';
+import 'package:three_o/presentation/widget/app_drawer.dart';
 
 class MainScaffold extends ConsumerWidget {
   const MainScaffold({super.key, required this.navigationShell});
@@ -26,15 +26,8 @@ class MainScaffold extends ConsumerWidget {
     final canCreateAgent = agentCount < 3;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(titles[navigationShell.currentIndex]),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => ref.read(authRepositoryProvider).signOut(),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: Text(titles[navigationShell.currentIndex])),
+      drawer: const AppDrawer(),
       body: navigationShell,
       floatingActionButton: navigationShell.currentIndex == 0
           ? FloatingActionButton(

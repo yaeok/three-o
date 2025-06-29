@@ -6,7 +6,27 @@ part of 'auth_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$firebaseAuthHash() => r'1c5f712b40844b55653244e998cf272e0ac00820';
+String _$deletionRequestRepositoryHash() =>
+    r'7f787a3ccd7df53036e86529180cd709c910f61a';
+
+/// See also [deletionRequestRepository].
+@ProviderFor(deletionRequestRepository)
+final deletionRequestRepositoryProvider =
+    AutoDisposeProvider<DeletionRequestRepository>.internal(
+      deletionRequestRepository,
+      name: r'deletionRequestRepositoryProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$deletionRequestRepositoryHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef DeletionRequestRepositoryRef =
+    AutoDisposeProviderRef<DeletionRequestRepository>;
+String _$firebaseAuthHash() => r'a9bdc0b9ac0d63228b424b9f82d22913f12f1ca8';
 
 /// See also [firebaseAuth].
 @ProviderFor(firebaseAuth)
@@ -24,7 +44,7 @@ final firebaseAuthProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef FirebaseAuthRef = AutoDisposeProviderRef<firebase.FirebaseAuth>;
-String _$authRepositoryHash() => r'ecb57762c434dd85a69909b7ff079b2e85967bdc';
+String _$authRepositoryHash() => r'6941272bd5567f3f9bc763191cd75cc047d4134b';
 
 /// See also [authRepository].
 @ProviderFor(authRepository)
@@ -41,7 +61,7 @@ final authRepositoryProvider = AutoDisposeProvider<AuthRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef AuthRepositoryRef = AutoDisposeProviderRef<AuthRepository>;
-String _$authStateChangesHash() => r'10d52561b19cc24acdd81ac476b70a9e9815947f';
+String _$authStateChangesHash() => r'3dc7053483ceb1046dd9d541c1088c21d694ead6';
 
 /// See also [authStateChanges].
 @ProviderFor(authStateChanges)
@@ -59,7 +79,7 @@ final authStateChangesProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef AuthStateChangesRef = AutoDisposeStreamProviderRef<firebase.User?>;
-String _$signUpUseCaseHash() => r'd1bc720af6903bba68758c86d57e65fcc067602e';
+String _$signUpUseCaseHash() => r'a17a800a8f36957d8f48f69f71ba5bd9f882df68';
 
 /// See also [signUpUseCase].
 @ProviderFor(signUpUseCase)
@@ -76,7 +96,7 @@ final signUpUseCaseProvider = AutoDisposeProvider<SignUpUseCase>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef SignUpUseCaseRef = AutoDisposeProviderRef<SignUpUseCase>;
-String _$signInUseCaseHash() => r'c6ac204cf3d8d14a9b5a14afd07c9c51c304a5c8';
+String _$signInUseCaseHash() => r'3be5fb94ae08302bbccc4de0394917075359007c';
 
 /// See also [signInUseCase].
 @ProviderFor(signInUseCase)
@@ -93,7 +113,27 @@ final signInUseCaseProvider = AutoDisposeProvider<SignInUseCase>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef SignInUseCaseRef = AutoDisposeProviderRef<SignInUseCase>;
-String _$appUserStreamHash() => r'a82d99b370feb0814fc1aae173fad682238bc753';
+String _$requestDeletionUsecaseHash() =>
+    r'1a7ae905f3f6dcb1292026e9d5797f5641cf76e7';
+
+/// See also [requestDeletionUsecase].
+@ProviderFor(requestDeletionUsecase)
+final requestDeletionUsecaseProvider =
+    AutoDisposeProvider<RequestDeletionUsecase>.internal(
+      requestDeletionUsecase,
+      name: r'requestDeletionUsecaseProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$requestDeletionUsecaseHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef RequestDeletionUsecaseRef =
+    AutoDisposeProviderRef<RequestDeletionUsecase>;
+String _$appUserStreamHash() => r'e20860a2596ae2e231959ef0709b3ef2b13e288c';
 
 /// See also [appUserStream].
 @ProviderFor(appUserStream)

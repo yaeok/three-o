@@ -1,64 +1,56 @@
 import 'package:firebase_auth/firebase_auth.dart' as firebase;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:three_o/application/usecase/request_deletion_usecase.dart';
 import 'package:three_o/application/usecase/sign_in_usecase.dart';
 import 'package:three_o/application/usecase/sign_up_usecase.dart';
 import 'package:three_o/domain/model/app_user/app_user.dart';
 import 'package:three_o/domain/repository/auth_repository.dart';
+import 'package:three_o/domain/repository/deletion_request_repository.dart';
 import 'package:three_o/infrastructure/repository/auth_repository_impl.dart';
+import 'package:three_o/infrastructure/repository/deletion_request_repository_impl.dart';
 import 'package:three_o/presentation/provider/user_profile_provider.dart';
 
 part 'auth_provider.g.dart';
 
 @riverpod
-firebase.FirebaseAuth firebaseAuth(Ref ref) {
-  return firebase.FirebaseAuth.instance;
+DeletionRequestRepository deletionRequestRepository(Ref ref) {
+  return DeletionRequestRepositoryImpl(ref.watch(firebaseFirestoreProvider));
 }
 
 @riverpod
-AuthRepository authRepository(Ref ref) {
-  return AuthRepositoryImpl(ref.watch(firebaseAuthProvider));
-}
+firebase.FirebaseAuth firebaseAuth(Ref ref) => firebase.FirebaseAuth.instance;
 
 @riverpod
-Stream<firebase.User?> authStateChanges(Ref ref) {
-  return ref.watch(authRepositoryProvider).authStateChanges();
-}
+AuthRepository authRepository(Ref ref) =>
+    AuthRepositoryImpl(ref.watch(firebaseAuthProvider));
 
 @riverpod
-SignUpUseCase signUpUseCase(Ref ref) {
-  return SignUpUseCase(ref.watch(authRepositoryProvider));
-}
+Stream<firebase.User?> authStateChanges(Ref ref) =>
+    ref.watch(authRepositoryProvider).authStateChanges();
 
 @riverpod
-SignInUseCase signInUseCase(Ref ref) {
-  return SignInUseCase(ref.watch(authRepositoryProvider));
+SignUpUseCase signUpUseCase(Ref ref) =>
+    SignUpUseCase(ref.watch(authRepositoryProvider));
+
+@riverpod
+SignInUseCase signInUseCase(Ref ref) =>
+    SignInUseCase(ref.watch(authRepositoryProvider));
+
+@riverpod
+RequestDeletionUsecase requestDeletionUsecase(Ref ref) {
+  return RequestDeletionUsecase(
+    ref.watch(deletionRequestRepositoryProvider),
+    ref.watch(authRepositoryProvider),
+  );
 }
 
 @riverpod
 Stream<AppUser?> appUserStream(Ref ref) {
-  // 修正前 (これはAsyncValueを返すためエラーになる)
-  // final authStateStream = ref.watch(authStateChangesProvider);
-
-  // 修正後：
-  // 1. まず、リポジトリのインスタンスを取得する
-  final authRepository = ref.watch(authRepositoryProvider);
-
-  // 2. リポジトリから、生のStream<User?>を取得する
-  final authStream = authRepository.authStateChanges();
-
-  // 3. 本物のStreamに対してなら、asyncMapが使える
+  final authStream = ref.watch(authRepositoryProvider).authStateChanges();
   return authStream.asyncMap((user) async {
-    // ログインしていない場合
-    if (user == null) {
-      return null;
-    }
-
-    // ログインしている場合、uidを使ってプロフィール情報を取得
-    // ここは .future を付けるのが確実
+    if (user == null) return null;
     final userProfile = await ref.watch(userProfileProvider(user.uid).future);
-
-    // Auth情報とProfile情報をマージして、新しいAppUserオブジェクトを返す
     return AppUser(
       uid: user.uid,
       email: user.email,
