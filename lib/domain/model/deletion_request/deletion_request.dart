@@ -1,20 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:three_o/domain/model/converter/timestamp_converter.dart';
 
 part 'deletion_request.freezed.dart';
 part 'deletion_request.g.dart';
-
-// FirestoreのTimestampとDartのDateTimeを変換するためのコンバーター
-class TimestampConverter implements JsonConverter<DateTime?, Timestamp?> {
-  const TimestampConverter();
-
-  @override
-  DateTime? fromJson(Timestamp? timestamp) => timestamp?.toDate();
-
-  @override
-  Timestamp? toJson(DateTime? dateTime) =>
-      dateTime == null ? null : Timestamp.fromDate(dateTime);
-}
 
 @freezed
 class DeletionRequest with _$DeletionRequest {
