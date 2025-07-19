@@ -1,0 +1,84 @@
+# Flutter specific
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.dart_tool/
+.idea/
+.vscode/
+
+# Build artifacts
+build/
+.gradle/
+*.iml
+*.ap_
+*.apk
+*.aab
+*.ipa
+*.app
+*.xctest
+*.xcarchive
+*.zip
+*.tar.gz
+
+# Generated files by build_runner and Riverpod Generator, Freezed, etc.
+**/*.g.dart
+**/*.freezed.dart
+**/*.gr.dart # if go_router_builder generates .gr.dart
+
+# Firebase specific
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+firebase_options.dart
+# For Firebase configuration files that contain sensitive information
+# These are typically added by the FlutterFire CLI
+# You might want to version control these if your project is open source and doesn't contain sensitive production keys.
+# Otherwise, it's safer to add them to .gitignore and manage them via environment variables or CI/CD.
+# google-services.json
+# GoogleService-Info.plist
+
+# macOS specific
+.DS_Store
+
+# Android specific
+android/local.properties
+android/.gradle
+/android/key.properties # Android signing key properties
+/android/app/src/debug/
+/android/app/src/release/
+/android/app/release/
+/android/app/build/
+/android/build/
+*.jks # Keystore files
+
+# iOS specific
+ios/.bundle/
+ios/.symlinks/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+ios/Pods/
+ios/.generated/
+ios/*.xcworkspace/xcuserdata/
+ios/.xcworkspace/xcshareddata/
+ios/.playground/
+ios/.swiftpm/
+ios/.vscode/
+# Pods generated files
+ios/Podfile.lock
+
+# Environment variables
+.env # if you use flutter_dotenv
+
+# VS Code specific (if not already covered by .vscode/)
+.history/
+
+# Other temporary files
+*.log
+*.temp
+*.tmp
+
+google-services.json
+
+.env.development
+
+ios/Runner/GoogleService-Info.plist
