@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:three_o/domain/model/resume/resume.dart';
+// ▼▼▼ user_profile_provider に変更 ▼▼▼
+import 'package:three_o/domain/model/user_profile/user_profile.dart';
 import 'package:three_o/presentation/provider/auth_provider.dart';
-import 'package:three_o/presentation/provider/resume_provider.dart';
+import 'package:three_o/presentation/provider/user_profile_provider.dart';
 
 class HistoryFormPage extends ConsumerStatefulWidget {
   const HistoryFormPage({super.key});
@@ -26,20 +28,16 @@ class _HistoryFormPageState extends ConsumerState<HistoryFormPage> {
   DateTime? _highEntranceDate;
   DateTime? _highGraduationDate;
 
-  // 初期化が完了したかを管理するフラグ
   bool _isInitialized = false;
 
   @override
   void dispose() {
-    // Controllerを破棄
     _elementarySchoolController.dispose();
     _juniorHighSchoolController.dispose();
     _highSchoolController.dispose();
     super.dispose();
   }
 
-  // 生年月日から学歴の年月を自動計算する
-  // (引数でbirthdayを受け取るように変更)
   void _autoFillEducationDates(DateTime birthday) {
     setState(() {
       _elementaryEntranceDate = DateTime(birthday.year + 6, 4);
@@ -51,10 +49,9 @@ class _HistoryFormPageState extends ConsumerState<HistoryFormPage> {
     });
   }
 
-  // 履歴書の既存の学歴をフォームに設定する
-  void _populateForm(Resume resume) {
-    // 既存の学歴から各学校のデータをフォームに設定
-    for (var history in resume.educationHistory) {
+  // ▼▼▼ 引数の型を UserProfile に変更 ▼▼▼
+  void _populateForm(UserProfile userProfile) {
+    for (var history in userProfile.educationHistory) {
       if (history.schoolName.contains('小学校')) {
         _elementarySchoolController.text = history.schoolName;
         _elementaryEntranceDate = history.entranceDate;
@@ -71,7 +68,8 @@ class _HistoryFormPageState extends ConsumerState<HistoryFormPage> {
     }
   }
 
-  Future<void> _saveHistory(Resume currentResume) async {
+  // ▼▼▼ 保存ロジックを全面的に変更 ▼▼▼
+  Future<void> _saveHistory(UserProfile currentUserProfile) async {
     if (!_formKey.currentState!.validate()) return;
 
     final educationHistory = [
@@ -95,12 +93,13 @@ class _HistoryFormPageState extends ConsumerState<HistoryFormPage> {
         ),
     ];
 
-    final updatedResume = currentResume.copyWith(
+    final updatedProfile = currentUserProfile.copyWith(
       educationHistory: educationHistory,
     );
 
     try {
-      await ref.read(saveResumeUseCaseProvider).execute(updatedResume);
+      // ▼▼▼ saveUserProfileUseCaseProvider を使用 ▼▼▼
+      await ref.read(saveUserProfileUseCaseProvider).execute(updatedProfile);
       if (mounted) {
         ScaffoldMessenger.of(
           context,
@@ -120,33 +119,28 @@ class _HistoryFormPageState extends ConsumerState<HistoryFormPage> {
   Widget build(BuildContext context) {
     final user = ref.watch(appUserStreamProvider).value;
     if (user == null) {
-      // ユーザー情報がなければローディング表示
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    final resumeAsync = ref.watch(resumeStreamProvider(user.uid));
+    // ▼▼▼ resumeStreamProvider から userProfileProvider に変更 ▼▼▼
+    final userProfileAsync = ref.watch(userProfileProvider(user.uid));
 
     return Scaffold(
       appBar: AppBar(title: const Text('経歴の編集')),
-      body: resumeAsync.when(
-        data: (resume) {
-          if (resume == null) {
-            return const Center(child: Text('履歴書データが見つかりません。先に履歴書を作成してください。'));
+      body: userProfileAsync.when(
+        data: (userProfile) {
+          if (userProfile == null) {
+            return const Center(child: Text('プロフィールデータが見つかりません。'));
           }
 
-          // --- データ取得後に一度だけ初期化処理を行う ---
           if (!_isInitialized) {
-            if (resume.educationHistory.isEmpty && user.birthday != null) {
-              // 履歴書に学歴がなく、生年月日がある場合のみ自動計算
+            if (userProfile.educationHistory.isEmpty && user.birthday != null) {
               _autoFillEducationDates(user.birthday!);
             } else {
-              // 既存の学歴データがあればフォームに反映
-              _populateForm(resume);
+              _populateForm(userProfile);
             }
-            // 初期化完了フラグを立てる
             _isInitialized = true;
           }
-          // ------------------------------------
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(24),
@@ -190,8 +184,9 @@ class _HistoryFormPageState extends ConsumerState<HistoryFormPage> {
                         setState(() => _highGraduationDate = date),
                   ),
                   const SizedBox(height: 40),
+                  // ▼▼▼ 保存ボタンの引数を userProfile に変更 ▼▼▼
                   ElevatedButton(
-                    onPressed: () => _saveHistory(resume),
+                    onPressed: () => _saveHistory(userProfile),
                     child: const Text('この内容で保存する'),
                   ),
                 ],

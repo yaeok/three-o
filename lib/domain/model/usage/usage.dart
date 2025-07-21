@@ -1,20 +1,9 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:three_o/domain/model/converter/timestamp_converter.dart';
 
 part 'usage.freezed.dart';
 part 'usage.g.dart';
-
-// FirestoreのTimestampとDartのDateTimeを変換するためのコンバーター
-class TimestampConverter implements JsonConverter<DateTime?, Timestamp?> {
-  const TimestampConverter();
-
-  @override
-  DateTime? fromJson(Timestamp? timestamp) => timestamp?.toDate();
-
-  @override
-  Timestamp? toJson(DateTime? dateTime) =>
-      dateTime == null ? null : Timestamp.fromDate(dateTime);
-}
 
 // ユーザーの利用状況を保持するモデル
 @freezed

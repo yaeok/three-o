@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:three_o/domain/model/converter/timestamp_converter.dart';
 
 part 'agent.freezed.dart';
 part 'agent.g.dart';
@@ -18,16 +19,4 @@ class Agent with _$Agent {
   }) = _Agent;
 
   factory Agent.fromJson(Map<String, dynamic> json) => _$AgentFromJson(json);
-}
-
-// TimestampとDateTimeを相互変換するためのコンバーター
-class TimestampConverter implements JsonConverter<DateTime?, Timestamp?> {
-  const TimestampConverter();
-
-  @override
-  DateTime? fromJson(Timestamp? timestamp) => timestamp?.toDate();
-
-  @override
-  Timestamp? toJson(DateTime? dateTime) =>
-      dateTime == null ? null : Timestamp.fromDate(dateTime);
 }

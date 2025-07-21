@@ -21,6 +21,13 @@ class UserProfileRepositoryImpl implements UserProfileRepository {
 
   @override
   Future<void> saveProfile(UserProfile userProfile) async {
-    await _usersRef().doc(userProfile.uid).set(userProfile);
+    // ▼▼▼ タイムスタンプ更新処理を追加 ▼▼▼
+    final now = DateTime.now();
+    final profileWithTimestamp = userProfile.copyWith(
+      createdAt: userProfile.createdAt ?? now,
+      updatedAt: now,
+    );
+    await _usersRef().doc(userProfile.uid).set(profileWithTimestamp);
+    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
   }
 }
