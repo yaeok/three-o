@@ -7,9 +7,9 @@ part 'user_profile.freezed.dart';
 part 'user_profile.g.dart';
 
 // ▼▼▼ このアノテーションを追加 ▼▼▼
-@JsonSerializable(explicitToJson: true)
 @freezed
 class UserProfile with _$UserProfile {
+  @JsonSerializable(explicitToJson: true)
   const factory UserProfile({
     required String uid,
     required String name,
